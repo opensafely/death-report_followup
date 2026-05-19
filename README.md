@@ -1,4 +1,4 @@
-# death-report
+# death-report_followup
 
 [View on OpenSAFELY](https://jobs.opensafely.org/repo/https%253A%252F%252Fgithub.com%252Fopensafely%252Fdeath-report)
 
