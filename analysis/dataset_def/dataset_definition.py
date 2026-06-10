@@ -5,10 +5,13 @@
 # the ONS and PC datasets.
 #
 # Author: Martina Pesce / Andrea Schaffer
+#Updated by Irene Kyomuhangi (2026)
 #   Bennett Institute for Applied Data Science
 #   University of Oxford, 2025
 ###################################################
 
+
+#import elevant ehrQL tools and tables
 from ehrql import create_dataset, case, when, codelist_from_csv
 from ehrql.tables.tpp import (
     patients,
@@ -18,6 +21,7 @@ from ehrql.tables.tpp import (
     addresses,
 )
 
+#create the dataset object
 dataset = create_dataset()
 
 
@@ -27,18 +31,18 @@ dataset = create_dataset()
 
 # Death definitions ------------------
 
-# ONS death date recorded
+# individual has ONS death date recorded
 has_ons_death_date = ons_deaths.date.is_not_null()
 
-# TPP structured death date recorded
+# individual has TPP structured death date recorded
 has_tpp_death_date = patients.date_of_death.is_not_null()
 
-# TPP coded death recorded
+# Load the codelist for death codes in tpp
 tpp_coded_death_codes = codelist_from_csv(
     "codelists/nhsd-primary-care-domain-refsets-death_cod.csv",
     column="code",
 )
-
+# Find and keep the earliest death date for coded tpp deaths
 tpp_coded_death_event = (
     clinical_events
     .where(clinical_events.snomedct_code.is_in(tpp_coded_death_codes))
@@ -46,16 +50,18 @@ tpp_coded_death_event = (
     .first_for_patient()
 )
 
+# individual has a coded death date recorded in tpp data
 has_tpp_coded_death = tpp_coded_death_event.date.is_not_null()
 
-# Death recorded in any source
+# individual has death recorded in any source (ons, structured tpp, coded tpp)
 has_any_death = (
     has_ons_death_date
     | has_tpp_death_date
     | has_tpp_coded_death
 )
 
-# Reference death date:
+# Generate Reference Death Date --------------- 
+# with the following priority:
 # 1) ONS death date
 # 2) TPP structured death date
 # 3) TPP coded death date
@@ -67,10 +73,10 @@ ref_death_date = case(
 )
 
 
-# Age at reference death date ---------------
+# Generate Age at reference death date ---------------
 age_at_death = patients.age_on(ref_death_date)
 
-# Keep plausible ages only.
+# Keep plausible ages only, keeping people ages 0-109 years.
 # Also retain infants aged <1 year, whose integer age may be recorded as 0.
 has_possible_age = (
     ((age_at_death >= 0) & (age_at_death < 110))
@@ -156,7 +162,7 @@ dataset.practice = practice_registrations.for_patient_on(ref_death_date).practic
 # -----------------------------------------------------------------------------
 
 dataset.configure_dummy_data(
-    population_size=10000,
+    population_size=1000,
     timeout=180,
     additional_population_constraint=(
         (dataset.tpp_death_date.is_on_or_between("2008-01-01", "2026-05-01")
