@@ -3,3 +3,69 @@ opensafely/ethnicity-snomed-0removed/22911876
 
 # death codes
 nhsd-primary-care-domain-refsets/death_cod/20250912/
+
+#chapter I codes
+opensafely/icd-10-chapter-i/10e46159
+
+#chapter II codes
+opensafely/icd-10-chapter-ii/77d4ee23
+
+#chapter III codes
+opensafely/icd-10-chapter-iii/5ec57aee
+
+#chapter IV codes
+opensafely/icd-10-chapter-iv/45b607b9
+
+#chapter V codes
+opensafely/icd-10-chapter-v/2ca69484
+
+#chapter VI codes
+opensafely/icd-10-chapter-vi/1397214f
+
+#chapter VII codes
+opensafely/icd-10-chapter-vii/7a87ae19
+
+#chapter VIII codes
+opensafely/icd-10-chapter-viii/61783ae4
+
+#chapter IX codes
+opensafely/icd-10-chapter-ix/4868c7af
+
+#chapter X codes
+opensafely/icd-10-chapter-x/2f59547a
+
+#chapter XI codes
+opensafely/icd-10-chapter-xi/1649e145
+
+#chapter XII codes
+opensafely/icd-10-chapter-xii/7d3a6e0f
+
+#chapter XIII codes
+opensafely/icd-10-chapter-xiii/642afada
+
+#chapter XIV codes
+opensafely/icd-10-chapter-xiv/4b1b87a5
+
+#chapter XV codes
+opensafely/icd-10-chapter-xv/320c1470
+
+#chapter XVI codes
+opensafely/icd-10-chapter-xvi/18fca13b
+
+#chapter XVII codes
+opensafely/icd-10-chapter-xvii/7fed2e05
+
+#chapter XVIII codes
+opensafely/icd-10-chapter-xviii/66ddbad0
+
+#chapter XIX codes
+opensafely/icd-10-chapter-xix/4dce479b
+
+#chapter XX codes
+opensafely/icd-10-chapter-xx/34bed466
+
+#chapter XXI codes
+opensafely/icd-10-chapter-xxi/1baf6131
+
+#chapter XXII codes
+opensafely/icd-10-chapter-xxii/029fedfc
