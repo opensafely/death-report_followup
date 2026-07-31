@@ -4,8 +4,8 @@ actions:
 
   dataset_death_raw:
     run: ehrql:v1 generate-dataset analysis/dataset_definition.py 
-      --output output/highly_sensitive/dataset_death_TPP_ONS.csv.gz
+      --output output/highly_sensitive/dataset_death_ons_tpp.csv.gz
     outputs:
       highly_sensitive:
-        dataset: output/highly_sensitive/dataset_death_TPP_ONS.csv.gz
+        dataset: output/highly_sensitive/dataset_death_ons_tpp.csv.gz
 
