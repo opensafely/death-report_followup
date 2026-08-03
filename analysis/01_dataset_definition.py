@@ -3,9 +3,9 @@
 #   Bennett Institute for Applied Data Science
 #   University of Oxford, 2026
 ####################################################
-# This script extracts information ONS deaths and corresponding death records in primary care data.
-# The goal is to analyse how factors such as underlying cause of death contribute to  
-# differences in recorded date of death between the two datasets 
+# Purpose:
+#   1. Extract ONS death data, and corresponding death records in primary care data
+#   2. Generate dummy data
 ###################################################
 
 
@@ -122,7 +122,7 @@ dataset.practice = practice_registrations.for_patient_on(ons_deaths.date).practi
 # -----------------------------------------------------------------------------
 
 dataset.configure_dummy_data(
-    population_size=10000,
+    population_size=20,
     timeout=180,
     additional_population_constraint=(
         # ONS death date
