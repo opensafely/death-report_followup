@@ -17,7 +17,12 @@ opensafely exec ehrql:v1 create-dummy-tables analysis/dataset_definition.py dumm
 opensafely exec ehrql:v1 generate-dataset analysis/dataset_definition.py --dummy-tables dummy_tables --output output/dummy_dataset.csv
 ```
 
-## Running prepate the dataset
+## Running 02
 ```bash
-Rscript analysis/01_prepare_dataset.R
+Rscript analysis/02_inclusion_exclusion_criteria.R
+```
+
+## Running 03
+```bash
+Rscript analysis/03_add_classifications.R
 ```
