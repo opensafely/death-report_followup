@@ -2,10 +2,19 @@ version: '5.0'
 
 actions:
 
-  dataset_death_raw:
-    run: ehrql:v1 generate-dataset analysis/dataset_definition.py 
+  extract_data:
+    run: ehrql:v1 generate-dataset analysis/01_dataset_definition.py 
       --output output/highly_sensitive/dataset_death_ons_tpp.csv.gz
     outputs:
       highly_sensitive:
         dataset: output/highly_sensitive/dataset_death_ons_tpp.csv.gz
 
+  apply_inclusion_exclusion:
+    needs: [extract_data]
+    run: r:v2 analysis/02_inclusion_exclusion_criteria.R
+    outputs:
+      highly_sensitive:
+        cohort: output/02_cohort.csv
+      moderately_sensitive:
+        cohort_flow: output/02_cohort_flow.csv
+        underlying_cause_summary: output/02_underlying_cause_summary.csv
