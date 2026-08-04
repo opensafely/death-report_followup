@@ -40,7 +40,7 @@ study_end_date <- as.Date("2026-02-01") # Update study_end_date to match the mos
 # -----------------------------------------------------------------------------
 # Read extracted OpenSAFELY dataset (dummy or real)
 death_data <- read_csv(
-  "output/dummy_dataset.csv"
+  "output/highly_sensitive/dataset_death_ons_tpp.csv.gz"
 )
 
 # -----------------------------------------------------------------------------
@@ -127,6 +127,27 @@ write_csv(
   paste0("output/", script_prefix, "_cohort_flow.csv")
 )
 
+
+# -----------------------------------------------------------------------------
+# Summarise underlying cause of death
+# -----------------------------------------------------------------------------
+
+# Summarise underlying cause of death codes
+underlying_cause_summary <- analysis_cohort %>%
+  count(underlying_cause_of_death, name = "n_records") %>%
+  mutate(
+    n_records = if_else(
+      n_records < 5,
+      "<5",
+      as.character(n_records)
+    )
+  ) %>%
+  arrange(underlying_cause_of_death)
+
+write_csv(
+  underlying_cause_summary,
+  "output/02_underlying_cause_summary.csv"
+)
 
 
 # -----------------------------------------------------------------------------
