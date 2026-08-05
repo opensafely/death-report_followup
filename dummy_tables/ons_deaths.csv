@@ -1,0 +1,21 @@
+patient_id,date,place,underlying_cause_of_death
+48,2024-02-17,Other communal establishment,C00.6
+111,2025-06-24,,C00
+129,2024-09-10,,I05.1
+130,2024-03-11,Home,I20
+186,2026-04-13,Home,S00.0
+195,2026-04-17,,S01.4
+252,2026-03-12,Care Home,A39.5
+306,2024-09-21,Hospice,A41.2
+321,2024-09-22,Hospice,G03
+397,2025-10-14,Care Home,J01.9
+422,2024-08-07,,J03.9
+466,2023-10-28,Hospital,G03
+485,2023-04-27,Other communal establishment,G03
+525,2025-04-15,Care Home,9gSFe5zV9lv
+545,2026-01-21,Hospital,J03.9
+553,2022-04-05,Care Home,G03
+585,2024-10-21,,G03
+587,2025-02-17,Home,G03
+690,2022-06-23,Hospital,G03
+696,2022-04-27,,G03

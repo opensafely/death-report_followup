@@ -11,6 +11,138 @@
       "url": "https://www.opencodelists.org/codelist/nhsd-primary-care-domain-refsets/death_cod/20250912/",
       "downloaded_at": "2025-12-23 13:03:26.486460Z",
       "sha": "3cb7b2670df14b3ff5f42c65ad31d1f11599f6fc"
+    },
+    "opensafely-icd-10-chapter-i.csv": {
+      "id": "opensafely/icd-10-chapter-i/10e46159",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-i/10e46159/",
+      "downloaded_at": "2026-07-21 14:33:12.015960Z",
+      "sha": "7aca1aa8a92cace55d48ddd5a62a5d13a41888e9"
+    },
+    "opensafely-icd-10-chapter-ii.csv": {
+      "id": "opensafely/icd-10-chapter-ii/77d4ee23",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-ii/77d4ee23/",
+      "downloaded_at": "2026-07-21 14:33:12.042214Z",
+      "sha": "c9e0232948887271d5e2f56b90c38d9c6334872c"
+    },
+    "opensafely-icd-10-chapter-iii.csv": {
+      "id": "opensafely/icd-10-chapter-iii/5ec57aee",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-iii/5ec57aee/",
+      "downloaded_at": "2026-07-21 14:33:12.073953Z",
+      "sha": "fbae3dc0074d906abef541d99e6f84e52cdc142a"
+    },
+    "opensafely-icd-10-chapter-iv.csv": {
+      "id": "opensafely/icd-10-chapter-iv/45b607b9",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-iv/45b607b9/",
+      "downloaded_at": "2026-07-21 14:33:12.100559Z",
+      "sha": "8b9a52bb63a85cc7a74136843ac38230d78e7dc3"
+    },
+    "opensafely-icd-10-chapter-v.csv": {
+      "id": "opensafely/icd-10-chapter-v/2ca69484",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-v/2ca69484/",
+      "downloaded_at": "2026-07-21 14:33:12.129235Z",
+      "sha": "dd8336968ec120c27c0783d3d15cd355394552e1"
+    },
+    "opensafely-icd-10-chapter-vi.csv": {
+      "id": "opensafely/icd-10-chapter-vi/1397214f",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-vi/1397214f/",
+      "downloaded_at": "2026-07-21 14:33:12.167797Z",
+      "sha": "aff530c94ef4b580972344b5d2f23b50c0c76535"
+    },
+    "opensafely-icd-10-chapter-vii.csv": {
+      "id": "opensafely/icd-10-chapter-vii/7a87ae19",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-vii/7a87ae19/",
+      "downloaded_at": "2026-07-21 14:33:12.195026Z",
+      "sha": "e20a6efa277d1061c8046edcbd6ed3561d569dc1"
+    },
+    "opensafely-icd-10-chapter-viii.csv": {
+      "id": "opensafely/icd-10-chapter-viii/61783ae4",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-viii/61783ae4/",
+      "downloaded_at": "2026-07-21 14:33:12.222932Z",
+      "sha": "5af9f334cf936eeb2afb3b20c3a12d10b2a82ae2"
+    },
+    "opensafely-icd-10-chapter-ix.csv": {
+      "id": "opensafely/icd-10-chapter-ix/4868c7af",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-ix/4868c7af/",
+      "downloaded_at": "2026-07-21 14:33:12.248211Z",
+      "sha": "1975a5ba3c65a414f79407b61567846241b79634"
+    },
+    "opensafely-icd-10-chapter-x.csv": {
+      "id": "opensafely/icd-10-chapter-x/2f59547a",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-x/2f59547a/",
+      "downloaded_at": "2026-07-21 14:33:12.285826Z",
+      "sha": "1b5266514d3b707dc073fbac53ba09e7e92fcfb3"
+    },
+    "opensafely-icd-10-chapter-xi.csv": {
+      "id": "opensafely/icd-10-chapter-xi/1649e145",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-xi/1649e145/",
+      "downloaded_at": "2026-07-21 14:33:12.309681Z",
+      "sha": "817d1180a6b0775dd28d54fccc4ec12033f3f1dd"
+    },
+    "opensafely-icd-10-chapter-xii.csv": {
+      "id": "opensafely/icd-10-chapter-xii/7d3a6e0f",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-xii/7d3a6e0f/",
+      "downloaded_at": "2026-07-21 14:33:12.342949Z",
+      "sha": "e48b274ce5dc145aa465eaec5c663516b36b7206"
+    },
+    "opensafely-icd-10-chapter-xiii.csv": {
+      "id": "opensafely/icd-10-chapter-xiii/642afada",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-xiii/642afada/",
+      "downloaded_at": "2026-07-21 14:33:12.364600Z",
+      "sha": "de6f962d79eceb8e0abe3701213666805b754af9"
+    },
+    "opensafely-icd-10-chapter-xiv.csv": {
+      "id": "opensafely/icd-10-chapter-xiv/4b1b87a5",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-xiv/4b1b87a5/",
+      "downloaded_at": "2026-07-21 14:33:12.400022Z",
+      "sha": "2b9c0e3210f8ad7ec875db570fc418148da95ab9"
+    },
+    "opensafely-icd-10-chapter-xv.csv": {
+      "id": "opensafely/icd-10-chapter-xv/320c1470",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-xv/320c1470/",
+      "downloaded_at": "2026-07-21 14:33:12.434893Z",
+      "sha": "2892b89265fb73524fabc98ea2bbcc26000049cf"
+    },
+    "opensafely-icd-10-chapter-xvi.csv": {
+      "id": "opensafely/icd-10-chapter-xvi/18fca13b",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-xvi/18fca13b/",
+      "downloaded_at": "2026-07-21 14:33:12.503808Z",
+      "sha": "1286b0f1d93b64a0a30eb3c3fd2a22763af1c160"
+    },
+    "opensafely-icd-10-chapter-xvii.csv": {
+      "id": "opensafely/icd-10-chapter-xvii/7fed2e05",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-xvii/7fed2e05/",
+      "downloaded_at": "2026-07-21 14:33:12.579416Z",
+      "sha": "5a4fac105a1f90000bec13128d4eed44234cf4f1"
+    },
+    "opensafely-icd-10-chapter-xviii.csv": {
+      "id": "opensafely/icd-10-chapter-xviii/66ddbad0",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-xviii/66ddbad0/",
+      "downloaded_at": "2026-07-21 14:33:12.667552Z",
+      "sha": "cb044e6f06c1ae3e5ff8ad86fa20e285cd5f58a4"
+    },
+    "opensafely-icd-10-chapter-xix.csv": {
+      "id": "opensafely/icd-10-chapter-xix/4dce479b",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-xix/4dce479b/",
+      "downloaded_at": "2026-07-21 14:33:12.749271Z",
+      "sha": "f45dba97c41e65728ce370ac5f0f9b5c9908c146"
+    },
+    "opensafely-icd-10-chapter-xx.csv": {
+      "id": "opensafely/icd-10-chapter-xx/34bed466",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-xx/34bed466/",
+      "downloaded_at": "2026-07-21 14:33:12.826407Z",
+      "sha": "b390462be984e6f71d3e5b4f4952f2ee81111677"
+    },
+    "opensafely-icd-10-chapter-xxi.csv": {
+      "id": "opensafely/icd-10-chapter-xxi/1baf6131",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-xxi/1baf6131/",
+      "downloaded_at": "2026-07-21 14:33:12.888677Z",
+      "sha": "cb91b25ef95c0941cb2c08ba1518478a1f164896"
+    },
+    "opensafely-icd-10-chapter-xxii.csv": {
+      "id": "opensafely/icd-10-chapter-xxii/029fedfc",
+      "url": "https://www.opencodelists.org/codelist/opensafely/icd-10-chapter-xxii/029fedfc/",
+      "downloaded_at": "2026-07-21 14:33:12.948530Z",
+      "sha": "e1ca44c6e4763495978aaccf1a2d64f44e6effa0"
     }
   }
 }
