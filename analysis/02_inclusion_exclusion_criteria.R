@@ -3,10 +3,7 @@
 #   Bennett Institute for Applied Data Science
 #   University of Oxford, 2026
 ####################################################
-# Purpose:
-# Extract underlying cause of death summary from ONS data 
-#
-# Step 1: Apply inclusion/exclusion criteria to the dataset
+# Purpose: Apply inclusion/exclusion criteria to the dataset
 # Inclusion criteria:
 #   - Registered death in the ONS dataset
 #   - ONS date of death on or after the study start date
@@ -17,9 +14,6 @@
 #   - Missing or impossible age >> *already applied in the dataset definition
 #   - Missing sex >> *already applied in the dataset definition
 #   - Death before date of birth
-#
-# Step 2: Extract a summary table listing the underlying cause of death, and the number of cases 
-# of that death (applying disclosure control to those counts)
 ###################################################
 
 
@@ -129,28 +123,6 @@ cohort_flow <- tibble(
 write_csv(
   cohort_flow,
   paste0("output/", script_prefix, "_cohort_flow.csv")
-)
-
-
-# -----------------------------------------------------------------------------
-# Summarise underlying cause of death
-# -----------------------------------------------------------------------------
-
-# Summarise underlying cause of death codes & apply disclosure control to the counts
-underlying_cause_summary <- analysis_cohort %>%
-  count(underlying_cause_of_death, name = "n_records") %>%
-  mutate(
-    n_records = if_else(
-      n_records <= 7,
-      "[REDACTED]",
-      as.character(round(n_records / 5) * 5)
-    )
-  ) %>%
-  arrange(underlying_cause_of_death)
-
-write_csv(
-  underlying_cause_summary,
-  "output/02_underlying_cause_summary.csv"
 )
 
 
