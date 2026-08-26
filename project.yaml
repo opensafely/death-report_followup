@@ -9,9 +9,9 @@ actions:
       highly_sensitive:
         dataset: output/highly_sensitive/dataset_death_ons_tpp.csv.gz
 
-  apply_inclusion_exclusion:
+  extract_underlying_cause_summary:
     needs: [extract_data]
-    run: r:v2 analysis/02_inclusion_exclusion_criteria.R
+    run: r:v2 analysis/02_extract_underlying_cause_summary.R
     outputs:
       highly_sensitive:
         cohort: output/02_cohort.csv
