@@ -4,18 +4,22 @@
 #   University of Oxford, 2026
 ####################################################
 # Purpose:
-# Apply inclusion/exclusion criteria to the dataset
+# Extract underlying cause of death summary from ONS data 
+#
+# Step 1: Apply inclusion/exclusion criteria to the dataset
 # Inclusion criteria:
 #   - Registered death in the ONS dataset
 #   - ONS date of death on or after the study start date
 #   - ONS date of death on or before the study end date (6 months before latest data extract)
 #   - Registered with a TPP practice on the date of death
-#
 # Exclusion criteria:
 #   - Age > 110 years >> *already applied in the dataset definition
 #   - Missing or impossible age >> *already applied in the dataset definition
 #   - Missing sex >> *already applied in the dataset definition
 #   - Death before date of birth
+#
+# Step 2: Extract a summary table listing the underlying cause of death, and the number of cases 
+# of that death (applying disclosure control to those counts)
 ###################################################
 
 
@@ -40,7 +44,7 @@ study_end_date <- as.Date("2026-02-01") # Update study_end_date to match the mos
 # -----------------------------------------------------------------------------
 # Read extracted OpenSAFELY dataset (dummy or real)
 death_data <- read_csv(
-  "output/dummy_dataset.csv"
+  "output/highly_sensitive/dataset_death_ons_tpp.csv.gz"
 )
 
 # -----------------------------------------------------------------------------
@@ -127,6 +131,27 @@ write_csv(
   paste0("output/", script_prefix, "_cohort_flow.csv")
 )
 
+
+# -----------------------------------------------------------------------------
+# Summarise underlying cause of death
+# -----------------------------------------------------------------------------
+
+# Summarise underlying cause of death codes & apply disclosure control to the counts
+underlying_cause_summary <- analysis_cohort %>%
+  count(underlying_cause_of_death, name = "n_records") %>%
+  mutate(
+    n_records = if_else(
+      n_records <= 7,
+      "[REDACTED]",
+      as.character(round(n_records / 5) * 5)
+    )
+  ) %>%
+  arrange(underlying_cause_of_death)
+
+write_csv(
+  underlying_cause_summary,
+  "output/02_underlying_cause_summary.csv"
+)
 
 
 # -----------------------------------------------------------------------------
