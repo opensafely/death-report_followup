@@ -62,7 +62,7 @@ has_possible_age = (
 dataset.define_population(
     has_ons_death_date
     & has_possible_age
-    & patients.sex.is_not_null()
+    & patients.sex.is_not_in("unknown")
 )
 
 

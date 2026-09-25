@@ -25,3 +25,18 @@ actions:
     outputs:
       moderately_sensitive:
         underlying_cause_summary: output/03_underlying_cause_summary.csv
+
+  add_classifications:
+    needs: [extract_underlying_cause_summary]
+    run: r:v2 analysis/04_add_classifications.R
+    outputs:
+      moderately_sensitive:
+        broad_cause_classification: output/04_broad_cause_classification.csv
+        broad_cause_codes_for_review: output/04_broad_cause_codes_for_review.csv
+
+  analysis:
+    needs: [apply_inclusion_exclusion, add_classifications]
+    run: r:v2 analysis/05_analysis.R
+    outputs:
+      moderately_sensitive:
+        diagnostic_table: output/05_tpp_diagnostic_summary.csv
