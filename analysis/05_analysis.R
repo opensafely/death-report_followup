@@ -25,6 +25,7 @@ library(dplyr)
 library(readr)
 library(stringr)
 
+
 # -----------------------------------------------------------------------------
 # Import utilities
 # -----------------------------------------------------------------------------
@@ -61,8 +62,6 @@ broad_cause_classification <- read_csv(
 # -----------------------------------------------------------------------------
 
 analysis_cohort <- analysis_cohort %>%
-
-  # Add the broad cause-of-death classification
   left_join(
     broad_cause_classification %>%
       select(
@@ -116,7 +115,7 @@ analysis_cohort <- analysis_cohort %>%
       ons_death_date != tpp_coded_death_date,
 
     # Mismatch in either available TPP death recording
-    mismatched_death_date =
+    mismatched_death_record =
       mismatched_tpp_death_date |
       mismatched_tpp_coded_death_date
   )
@@ -127,16 +126,7 @@ analysis_cohort <- analysis_cohort %>%
 # -----------------------------------------------------------------------------
 
 # Create a diagnostic summary of death recording in TPP.
-#
-# TPP deaths may be recorded either as a structured date of death or as a
-# coded death event. The study outcomes use information from both sources.
-# This table is produced as a quality assurance check to show:
-#   - how often each type of TPP death record is present;
-#   - how often both types of TPP death record are present; and
-#   - how often the date from each TPP source differs from the ONS date of death.
-#
 # These measures are diagnostic checks and are not additional study outcomes.
-# Create a diagnostic summary of death recording in TPP.
 #
 # TPP deaths may be recorded either as a structured date of death or as a
 # coded death event. The study outcomes use information from both sources.
@@ -145,8 +135,7 @@ analysis_cohort <- analysis_cohort %>%
 #   - how often both types of TPP death record are present;
 #   - how often the two TPP death dates disagree with each other; and
 #   - how often the date from each TPP source differs from the ONS date of death.
-#
-# These measures are diagnostic checks and are not additional study outcomes.
+
 diagnostic_table <- tibble(
   measure = c(
     "Structured TPP death date present",
@@ -174,18 +163,152 @@ diagnostic_table <- tibble(
   )
 )
 
-# Apply statistical disclosure control to diagnostic table
 diagnostic_table <- diagnostic_table %>%
   mutate(
-    n = apply_sdc(n)
+    # Apply statistical disclosure control
+    n = apply_sdc(n),
+
+    # Format redacted counts for output
+    n = if_else(
+      is.na(n),
+      "[REDACTED]",
+      as.character(n)
+    )
   )
 
-# Save diagnostic table
 write_csv(
   diagnostic_table,
   paste0(
     "output/",
     script_prefix,
-    "_tpp_diagnostic_summary.csv"
+    "_tpp_death_recording_diagnostic.csv"
+  )
+)
+
+
+# =============================================================================
+# Broad cause-of-death analysis
+# =============================================================================
+
+# Summarise death recording and discordance by broad cause-of-death group.
+#
+# For ONS-only deaths, the denominator is all individuals in each
+# broad cause-of-death group.
+#
+# For mismatched structured TPP death dates, the denominator is individuals
+# with a structured TPP death date in each broad cause-of-death group.
+#
+# For mismatched TPP death records, the denominator is individuals with at
+# least one TPP death record (structured death date or coded death) in each
+# broad cause-of-death group.
+#
+# The two mismatch measures are retained separately at this stage to assess
+# whether including coded TPP death records materially changes the results.
+
+broad_cause_results <- analysis_cohort %>%
+  group_by(broad_cause_group) %>%
+  summarise(
+
+    # All individuals in the broad cause-of-death group
+    n_total = n(),
+
+    # ONS-only death
+    n_ons_only = sum(ons_only_death),
+
+    # Individuals with a structured TPP date of death
+    n_tpp_death_date = sum(has_tpp_death_date),
+
+    # Individuals with at least one TPP death record
+    # (structured death date or coded death)
+    n_tpp_death_record = sum(has_tpp_death_record),
+
+    # Structured TPP death date differs from ONS date of death
+    n_mismatched_date = sum(mismatched_tpp_death_date),
+
+    # At least one available TPP death date differs from ONS date of death
+    n_mismatched_record = sum(mismatched_death_record),
+
+    .groups = "drop"
+  )
+
+# -----------------------
+# Apply disclosure control and calculate percentages
+# Percentages are calculated from the disclosure-controlled counts;
+# where either underlying count is redacted, the percentage is also redacted.
+broad_cause_results <- broad_cause_results %>%
+  mutate(
+    # Apply SDC to counts
+    n_total = apply_sdc(n_total),
+    n_ons_only = apply_sdc(n_ons_only),
+    n_tpp_death_date = apply_sdc(n_tpp_death_date),
+    n_tpp_death_record = apply_sdc(n_tpp_death_record),
+    n_mismatched_date = apply_sdc(n_mismatched_date),
+    n_mismatched_record = apply_sdc(n_mismatched_record),
+    pct_ons_only =
+      round(
+        100 * n_ons_only / n_total,
+        1
+      ),
+    pct_mismatched_date =
+      round(
+        100 * n_mismatched_date / n_tpp_death_date,
+        1
+      ),
+    pct_mismatched_record =
+      round(
+        100 * n_mismatched_record / n_tpp_death_record,
+        1
+      )
+  )
+
+# -----------------------
+# Format broad cause-of-death results for output
+# Replace redacted values with "[REDACTED]" and order columns for presentation
+
+broad_cause_results <- broad_cause_results %>%
+  mutate(
+    across(
+      c(
+        n_total,
+        n_ons_only,
+        pct_ons_only,
+        n_tpp_death_date,
+        n_mismatched_date,
+        pct_mismatched_date,
+        n_tpp_death_record,
+        n_mismatched_record,
+        pct_mismatched_record
+      ),
+      ~ if_else(
+        is.na(.x),
+        "[REDACTED]",
+        as.character(.x)
+      )
+    )
+  ) %>%
+  select(
+    broad_cause_group,
+    n_total,
+    n_ons_only,
+    pct_ons_only,
+    n_tpp_death_date,
+    n_mismatched_date,
+    pct_mismatched_date,
+    n_tpp_death_record,
+    n_mismatched_record,
+    pct_mismatched_record
+  )
+
+
+# -----------------------------------------------------------------------------
+# Save broad cause-of-death results
+# -----------------------------------------------------------------------------
+
+write_csv(
+  broad_cause_results,
+  paste0(
+    "output/",
+    script_prefix,
+    "_broad_cause_results.csv"
   )
 )

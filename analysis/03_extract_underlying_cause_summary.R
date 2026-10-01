@@ -48,8 +48,16 @@ analysis_cohort <- read_csv(
 underlying_cause_summary <- analysis_cohort %>%
   count(underlying_cause_of_death, name = "n_records") %>%
   mutate(
-    n_records = apply_sdc(n_records)
-  )  %>%
+    # Apply statistical disclosure control
+    n_records = apply_sdc(n_records),
+
+    # Format redacted counts for output
+    n_records = if_else(
+      is.na(n_records),
+      "[REDACTED]",
+      as.character(n_records)
+    )
+  ) %>%
   arrange(underlying_cause_of_death)
 
 write_csv(

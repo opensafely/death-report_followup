@@ -39,4 +39,5 @@ actions:
     run: r:v2 analysis/05_analysis.R
     outputs:
       moderately_sensitive:
-        diagnostic_table: output/05_tpp_diagnostic_summary.csv
+        tpp_death_recording_diagnostic: output/05_tpp_death_recording_diagnostic.csv
+        broad_cause_results: output/05_broad_cause_results.csv

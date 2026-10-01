@@ -130,7 +130,15 @@ cohort_flow <- tibble(
 # Apply statistical disclosure control to counts
 cohort_flow <- cohort_flow %>%
   mutate(
-    n = apply_sdc(n)
+    # Apply statistical disclosure control
+    n = apply_sdc(n),
+
+    # Format redacted counts for output
+    n = if_else(
+      is.na(n),
+      "[REDACTED]",
+      as.character(n)
+    )
   )
 
 write_csv(
