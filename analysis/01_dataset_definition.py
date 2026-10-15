@@ -3,14 +3,12 @@
 #   Bennett Institute for Applied Data Science
 #   University of Oxford, 2026
 ####################################################
-# Purpose:
-#   1. Extract ONS death data, and corresponding death records in primary care data
-#   2. Generate dummy data
+# Purpose: Extract ONS death data, and corresponding death records in primary care data
 ###################################################
 
 
 #import elevant ehrQL tools and tables
-from ehrql import create_dataset
+from ehrql import create_dataset, days
 from ehrql.tables.tpp import (
     patients,
     ons_deaths,
@@ -20,8 +18,15 @@ from ehrql.tables.tpp import (
 from codelists import (
     TPP_CODED_DEATH_CODES
 )
+
+
 # create the dataset object
 dataset = create_dataset()
+
+# define the study period
+study_start_date = "2022-01-01"
+study_end_date = "2026-03-01"
+
 
 
 # -----------------------------------------------------------------------------
@@ -30,8 +35,11 @@ dataset = create_dataset()
 
 # ----------------Death definitions ----------------
 
-# individual has ONS death date recorded
-has_ons_death_date = ons_deaths.date.is_not_null()
+# individual has ONS death date recorded within the study period
+has_ons_death_date = ons_deaths.date.is_on_or_between(
+    study_start_date,
+    study_end_date
+)
 
 # Find and keep the earliest death date for coded tpp deaths
 tpp_coded_death_event = (
@@ -53,8 +61,10 @@ age_at_ons_death = patients.age_on(ons_deaths.date)
 # Keep plausible ages only, keeping people ages 0-110 years.
 # Also retain infants aged <1 year, whose integer age may be recorded as 0.
 has_possible_age = (
-    ((age_at_ons_death >= 0) & (age_at_ons_death <= 110))
-    | (patients.date_of_birth.year == ons_deaths.date.year)
+    ((age_at_ons_death >= 0) & 
+        (age_at_ons_death <= 110)) | 
+     ((patients.date_of_birth.year == ons_deaths.date.year) & 
+         (patients.date_of_birth.month == ons_deaths.date.month))
 )
 
 
@@ -62,7 +72,7 @@ has_possible_age = (
 dataset.define_population(
     has_ons_death_date
     & has_possible_age
-    & patients.sex.is_not_null()
+    & patients.sex.is_not_in(["unknown"])
 )
 
 
@@ -73,18 +83,15 @@ dataset.define_population(
 
 # ---------------- Registration status --------------
 
-# To later apply inclusion criteria on registration, extract last registration info
-last_registration = (
-    practice_registrations
-    .sort_by(
-        practice_registrations.start_date,
-        practice_registrations.end_date,
-    )
-    .last_for_patient()
-)
+# Identify the TPP practice registration on the day before ONS death
+registration_day_before_death = practice_registrations.for_patient_on(
+        ons_deaths.date - days(1)
+        )
 
-dataset.last_registration_start_date = last_registration.start_date
-dataset.last_registration_end_date = last_registration.end_date
+# Flag individuals registeres on teh day before death
+dataset.registered_day_before_death = (
+    registration_day_before_death.start_date.is_not_null()
+)   
 
 
 # ---------------- Death ----------------
@@ -111,37 +118,46 @@ dataset.place_of_death = ons_deaths.place
 # ---------------- Region & Practice ----------------
 
 # Practice region
-dataset.region = practice_registrations.for_patient_on(ons_deaths.date).practice_nuts1_region_name
+dataset.region = registration_day_before_death.practice_nuts1_region_name
 
 # Practice (anonymous ID)
-dataset.practice = practice_registrations.for_patient_on(ons_deaths.date).practice_pseudo_id
+dataset.practice = registration_day_before_death.practice_pseudo_id
 
 
 # -----------------------------------------------------------------------------
-# Dummy data
+# Dummy data (currently disabled)
 # -----------------------------------------------------------------------------
 
-dataset.configure_dummy_data(
-    population_size=20,
-    timeout=180,
-    additional_population_constraint=(
-        # ONS death date
-        (dataset.ons_death_date.is_on_or_between( "2022-01-01", "2026-05-01")
-            | dataset.ons_death_date.is_null()
-        ) &
-        # Structured TPP death date
-        (dataset.tpp_death_date.is_on_or_between("2022-01-01", "2026-05-01")
-            | dataset.tpp_death_date.is_null()
-        )
-        &
-        # Coded TPP death date
-        (dataset.tpp_coded_death_date.is_on_or_between("2022-01-01", "2026-05-01")
-            | dataset.tpp_coded_death_date.is_null()
-        )
-        &
-        # Registration start date
-        (dataset.last_registration_start_date.is_on_or_between( "2010-01-01","2026-05-01")
-            | dataset.last_registration_start_date.is_null()
-        )
-    ),
-)
+# Native ehrQL dummy-data generation is disabled because a custom synthetic
+# dataset is supplied through --dummy-data-file in project.yaml.
+# Retained for potential future use.
+
+# dataset.configure_dummy_data(
+#     population_size=20,
+#     timeout=180,
+#     additional_population_constraint=(
+#         # ONS death date
+#         dataset.ons_death_date.is_on_or_between(
+#             study_start_date,
+#             study_end_date
+#         )
+#         &
+#         # Structured TPP death date
+#         (
+#             dataset.tpp_death_date.is_on_or_between(
+#                 study_start_date,
+#                 study_end_date
+#             )
+#             | dataset.tpp_death_date.is_null()
+#         )
+#         &
+#         # Coded TPP death date
+#         (
+#             dataset.tpp_coded_death_date.is_on_or_between(
+#                 study_start_date,
+#                 study_end_date
+#             )
+#             | dataset.tpp_coded_death_date.is_null()
+#         )
+#     ),
+# )
