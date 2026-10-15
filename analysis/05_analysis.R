@@ -8,9 +8,9 @@
 #   recorded date of death for two groups:
 #   - individuals with ONS-only date of death
 #   - individuals with mismatched recorded date of death
-#     for either structural date of death or death code
+#     for either structured date of death or death code
 #   Analyses will examine variation by:
-#   - the 4 classifications of underlying cause of death :
+#   - the 4 classifications of underlying cause of death:
 #      * broad cause of death
 #      * death circumstance (to be added)
 #      * likelihood of coroner referral (to be added)
@@ -82,12 +82,16 @@ analysis_cohort <- analysis_cohort %>%
 # ONS death recorded, with neither a structured TPP date of death nor a
 # TPP coded death record.
 #
-# Outcome 2: Mismatched recorded date of death
-# Among individuals with at least one TPP death record, at least one available
-# TPP death date (structured or coded) differs from the ONS date of death.
+# Outcome 2: Discordance in recorded date of death
+# Among individuals with at least one TPP death record, compare the
+# structured TPP date with ONS where available, otherwise the coded TPP date.
+# Both exact agreement and the magnitude/direction of differences are examined.
 
 analysis_cohort <- analysis_cohort %>%
   mutate(
+    ons_death_date = as.Date(ons_death_date),
+    tpp_death_date = as.Date(tpp_death_date),
+    tpp_coded_death_date = as.Date(tpp_coded_death_date),
 
     # TPP death recording
     has_tpp_death_date =
@@ -114,15 +118,46 @@ analysis_cohort <- analysis_cohort %>%
       has_tpp_death_code &
       ons_death_date != tpp_coded_death_date,
 
-    # Mismatch in either available TPP death recording
-    mismatched_death_record =
-      mismatched_tpp_death_date |
-      mismatched_tpp_coded_death_date
+    # Mismatch using the structured TPP date where available,
+    # otherwise the coded TPP date
+    mismatched_death_record = case_when(
+      has_tpp_death_date ~ ons_death_date != tpp_death_date,
+      has_tpp_death_code ~ ons_death_date != tpp_coded_death_date,
+      .default = FALSE
+    )
   )
 
 
 # -----------------------------------------------------------------------------
-# Diagnostic table
+# Define differences in recorded dates of death
+# -----------------------------------------------------------------------------
+
+# Calculate differences between ONS and TPP recorded dates of death.
+# The structured TPP death date takes precedence over the coded death date
+# when both are available.
+#
+# Differences are calculated as TPP minus ONS in days. Negative values
+# indicate TPP dates before ONS; positive values indicate dates after ONS.
+# Differences are grouped using the categories from the previous death-report
+# study. Individuals without a TPP comparison date have missing differences.
+
+analysis_cohort <- analysis_cohort %>%
+  mutate(
+    # Structured TPP date preferred; coded date used if unavailable
+    tpp_date_for_comparison =
+      coalesce(tpp_death_date, tpp_coded_death_date),
+
+    # Difference between selected TPP date and ONS
+    record_difference_days =
+      as.numeric(tpp_date_for_comparison - ons_death_date),
+
+    record_difference_group =
+      categorise_date_difference(record_difference_days)
+  )
+
+
+# -----------------------------------------------------------------------------
+# Diagnostic summary of death recording in TPP.
 # -----------------------------------------------------------------------------
 
 # Create a diagnostic summary of death recording in TPP.
@@ -146,29 +181,29 @@ diagnostic_table <- tibble(
     "TPP coded death date and ONS date of death mismatch"
   ),
   n = c(
-    sum(analysis_cohort$has_tpp_death_date),
-    sum(analysis_cohort$has_tpp_death_code),
+    sum(analysis_cohort$has_tpp_death_date, na.rm = TRUE),
+    sum(analysis_cohort$has_tpp_death_code, na.rm = TRUE),
     sum(
       analysis_cohort$has_tpp_death_date &
-        analysis_cohort$has_tpp_death_code
+        analysis_cohort$has_tpp_death_code,
+      na.rm = TRUE
     ),
     sum(
       analysis_cohort$has_tpp_death_date &
         analysis_cohort$has_tpp_death_code &
         analysis_cohort$tpp_death_date !=
-          analysis_cohort$tpp_coded_death_date
+          analysis_cohort$tpp_coded_death_date,
+      na.rm = TRUE
     ),
-    sum(analysis_cohort$mismatched_tpp_death_date),
-    sum(analysis_cohort$mismatched_tpp_coded_death_date)
+    sum(analysis_cohort$mismatched_tpp_death_date, na.rm = TRUE),
+    sum(analysis_cohort$mismatched_tpp_coded_death_date, na.rm = TRUE)
   )
 )
 
+# Apply SDC and format redacted counts for output
 diagnostic_table <- diagnostic_table %>%
   mutate(
-    # Apply statistical disclosure control
     n = apply_sdc(n),
-
-    # Format redacted counts for output
     n = if_else(
       is.na(n),
       "[REDACTED]",
@@ -176,12 +211,13 @@ diagnostic_table <- diagnostic_table %>%
     )
   )
 
+# Save diagnostic table
 write_csv(
   diagnostic_table,
   paste0(
     "output/",
     script_prefix,
-    "_tpp_death_recording_diagnostic.csv"
+    "_tpp_recording_diagnostic.csv"
   )
 )
 
@@ -198,12 +234,16 @@ write_csv(
 # For mismatched structured TPP death dates, the denominator is individuals
 # with a structured TPP death date in each broad cause-of-death group.
 #
-# For mismatched TPP death records, the denominator is individuals with at
-# least one TPP death record (structured death date or coded death) in each
-# broad cause-of-death group.
+# For exact agreement, any mismatch and date-difference categories, the
+# denominator is individuals with at least one TPP death record.
+# The structured TPP date takes precedence over the coded date.
 #
-# The two mismatch measures are retained separately at this stage to assess
-# whether including coded TPP death records materially changes the results.
+# The two mismatch measures are retained separately to assess whether
+# including coded TPP death records materially changes the results.
+#
+# Date-difference categories follow the previous death-report study.
+# Exact agreement and any mismatch are mutually exclusive; the six
+# directional categories provide a breakdown of any mismatch.
 
 broad_cause_results <- analysis_cohort %>%
   group_by(broad_cause_group) %>%
@@ -213,72 +253,167 @@ broad_cause_results <- analysis_cohort %>%
     n_total = n(),
 
     # ONS-only death
-    n_ons_only = sum(ons_only_death),
+    n_ons_only = sum(ons_only_death, na.rm = TRUE),
 
     # Individuals with a structured TPP date of death
-    n_tpp_death_date = sum(has_tpp_death_date),
+    n_tpp_death_date = sum(has_tpp_death_date, na.rm = TRUE),
+
+    # Structured TPP date differs from ONS
+    n_mismatched_date =
+      sum(mismatched_tpp_death_date, na.rm = TRUE),
 
     # Individuals with at least one TPP death record
-    # (structured death date or coded death)
-    n_tpp_death_record = sum(has_tpp_death_record),
+    n_tpp_death_record =
+      sum(has_tpp_death_record, na.rm = TRUE),
 
-    # Structured TPP death date differs from ONS date of death
-    n_mismatched_date = sum(mismatched_tpp_death_date),
+    # Exact agreement between selected TPP date and ONS
+    n_exact_agreement =
+      sum(record_difference_group == "0", na.rm = TRUE),
 
-    # At least one available TPP death date differs from ONS date of death
-    n_mismatched_record = sum(mismatched_death_record),
+    # Any difference between selected TPP date and ONS
+    n_mismatched_record =
+      sum(mismatched_death_record, na.rm = TRUE),
+
+    # TPP date before ONS
+    n_earlier_29plus =
+      sum(record_difference_group == "-29+", na.rm = TRUE),
+
+    n_earlier_8_28 =
+      sum(record_difference_group == "-28 to -8", na.rm = TRUE),
+
+    n_earlier_1_7 =
+      sum(record_difference_group == "-7 to -1", na.rm = TRUE),
+
+    # TPP date after ONS
+    n_later_1_7 =
+      sum(record_difference_group == "1 to 7", na.rm = TRUE),
+
+    n_later_8_28 =
+      sum(record_difference_group == "8 to 28", na.rm = TRUE),
+
+    n_later_29plus =
+      sum(record_difference_group == "29+", na.rm = TRUE),
 
     .groups = "drop"
+      )
+
+
+# -----------------------------------------------------------------------------
+# Validation checks for date of death differences
+# -----------------------------------------------------------------------------
+
+# Check that exact agreement and mismatch account for all individuals
+# with a TPP death record, and that the six directional categories account
+# for all mismatches. Checks use raw counts before disclosure control.
+#
+# Validation flags identify inconsistencies without stopping the analysis.
+# TRUE indicates that the counts are consistent.
+
+broad_cause_results <- broad_cause_results %>%
+  mutate(
+    check_agreement =
+      n_exact_agreement + n_mismatched_record ==
+      n_tpp_death_record,
+
+    check_difference_categories =
+      n_earlier_29plus +
+      n_earlier_8_28 +
+      n_earlier_1_7 +
+      n_later_1_7 +
+      n_later_8_28 +
+      n_later_29plus ==
+      n_mismatched_record
   )
 
-# -----------------------
+# Summarise validation checks across all broad cause-of-death groups
+validation_summary <- broad_cause_results %>%
+  summarise(
+    agreement_check_passed = all(check_agreement),
+    difference_categories_check_passed =
+      all(check_difference_categories)
+  )
+
+# Save validation summary
+write_csv(
+  validation_summary,
+  paste0(
+    "output/",
+    script_prefix,
+    "_date_difference_validation.csv"
+  )
+)
+
+
+# -----------------------------------------------------------------------------
 # Apply disclosure control and calculate percentages
-# Percentages are calculated from the disclosure-controlled counts;
-# where either underlying count is redacted, the percentage is also redacted.
+# -----------------------------------------------------------------------------
+
+# Percentages are calculated from disclosure-controlled counts.
+# Where a numerator or denominator is redacted, the percentage is also
+# redacted.
+#
+# Numerator: the count for each outcome or date-difference category.
+# Denominator:
+#   - n_total for ONS-only deaths
+#   - n_tpp_death_date for structured-date mismatches
+#   - n_tpp_death_record for all remaining comparisons
+
 broad_cause_results <- broad_cause_results %>%
   mutate(
     # Apply SDC to counts
-    n_total = apply_sdc(n_total),
-    n_ons_only = apply_sdc(n_ons_only),
-    n_tpp_death_date = apply_sdc(n_tpp_death_date),
-    n_tpp_death_record = apply_sdc(n_tpp_death_record),
-    n_mismatched_date = apply_sdc(n_mismatched_date),
-    n_mismatched_record = apply_sdc(n_mismatched_record),
+    across(
+      starts_with("n_"),
+      apply_sdc
+    ),
+
+    # ONS-only death
     pct_ons_only =
-      round(
-        100 * n_ons_only / n_total,
-        1
-      ),
+      round(100 * n_ons_only / n_total, 1),
+
+    # Structured TPP death-date mismatch
     pct_mismatched_date =
-      round(
-        100 * n_mismatched_date / n_tpp_death_date,
-        1
-      ),
+      round(100 * n_mismatched_date / n_tpp_death_date, 1),
+
+    # Exact agreement and any mismatch
+    pct_exact_agreement =
+      round(100 * n_exact_agreement / n_tpp_death_record, 1),
+
     pct_mismatched_record =
-      round(
-        100 * n_mismatched_record / n_tpp_death_record,
-        1
-      )
+      round(100 * n_mismatched_record / n_tpp_death_record, 1),
+
+    # TPP date before ONS
+    pct_earlier_29plus =
+      round(100 * n_earlier_29plus / n_tpp_death_record, 1),
+
+    pct_earlier_8_28 =
+      round(100 * n_earlier_8_28 / n_tpp_death_record, 1),
+
+    pct_earlier_1_7 =
+      round(100 * n_earlier_1_7 / n_tpp_death_record, 1),
+
+    # TPP date after ONS
+    pct_later_1_7 =
+      round(100 * n_later_1_7 / n_tpp_death_record, 1),
+
+    pct_later_8_28 =
+      round(100 * n_later_8_28 / n_tpp_death_record, 1),
+
+    pct_later_29plus =
+      round(100 * n_later_29plus / n_tpp_death_record, 1)
   )
 
-# -----------------------
+
+# -----------------------------------------------------------------------------
 # Format broad cause-of-death results for output
-# Replace redacted values with "[REDACTED]" and order columns for presentation
+# -----------------------------------------------------------------------------
+
+# Replace redacted values with "[REDACTED]" and order columns for presentation.
+# Validation flags are excluded from the substantive results table.
 
 broad_cause_results <- broad_cause_results %>%
   mutate(
     across(
-      c(
-        n_total,
-        n_ons_only,
-        pct_ons_only,
-        n_tpp_death_date,
-        n_mismatched_date,
-        pct_mismatched_date,
-        n_tpp_death_record,
-        n_mismatched_record,
-        pct_mismatched_record
-      ),
+      c(starts_with("n_"), starts_with("pct_")),
       ~ if_else(
         is.na(.x),
         "[REDACTED]",
@@ -288,15 +423,41 @@ broad_cause_results <- broad_cause_results %>%
   ) %>%
   select(
     broad_cause_group,
+
     n_total,
+
     n_ons_only,
     pct_ons_only,
+
     n_tpp_death_date,
     n_mismatched_date,
     pct_mismatched_date,
+
     n_tpp_death_record,
+
+    n_exact_agreement,
+    pct_exact_agreement,
+
     n_mismatched_record,
-    pct_mismatched_record
+    pct_mismatched_record,
+
+    n_earlier_29plus,
+    pct_earlier_29plus,
+
+    n_earlier_8_28,
+    pct_earlier_8_28,
+
+    n_earlier_1_7,
+    pct_earlier_1_7,
+
+    n_later_1_7,
+    pct_later_1_7,
+
+    n_later_8_28,
+    pct_later_8_28,
+
+    n_later_29plus,
+    pct_later_29plus
   )
 
 

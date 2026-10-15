@@ -4,7 +4,7 @@ actions:
 
   extract_data:
     run: ehrql:v1 generate-dataset analysis/01_dataset_definition.py
-      --dummy-tables dummy_tables
+      --dummy-data-file dummy_data/dummy_dataset.csv
       --output output/highly_sensitive/dataset_death_ons_tpp.csv.gz
     outputs:
       highly_sensitive:
@@ -39,5 +39,6 @@ actions:
     run: r:v2 analysis/05_analysis.R
     outputs:
       moderately_sensitive:
-        tpp_death_recording_diagnostic: output/05_tpp_death_recording_diagnostic.csv
+        tpp_recording_diagnostic: output/05_tpp_recording_diagnostic.csv
+        date_difference_validation: output/05_date_difference_validation.csv
         broad_cause_results: output/05_broad_cause_results.csv
